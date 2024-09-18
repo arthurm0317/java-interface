@@ -6,39 +6,48 @@ import services.ContractService;
 import services.OnlinePaymentService;
 import services.PaypalService;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        try{
+            Locale.setDefault(Locale.US);
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Entre com os dados do contrato");
+            System.out.print("Numero: ");
+            int number = scanner.nextInt();
+            System.out.print("Data (dd/mm/yyyy): ");
+            LocalDate date = LocalDate.parse(scanner.next(),dtf);
+            System.out.print("Valor do contrato: ");
+            double totalValue = scanner.nextDouble();
 
-        Locale.setDefault(Locale.US);
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Entre com os dados do contrato");
-        System.out.print("Numero: ");
-        int number = scanner.nextInt();
-        System.out.print("Data (dd/mm/yyyy): ");
-        LocalDate date = LocalDate.parse(scanner.next(),dtf);
-        System.out.print("Valor do contrato: ");
-        double totalValue = scanner.nextDouble();
+            Contract contract = new Contract(number, date, totalValue);
 
-        Contract contract = new Contract(number, date, totalValue);
-
-        System.out.print("Entre com o numero de parcelas: ");
-        int parcelas = scanner.nextInt();
+            System.out.print("Entre com o numero de parcelas: ");
+            int parcelas = scanner.nextInt();
 
 
-        OnlinePaymentService paypalService = new PaypalService();
+            OnlinePaymentService paypalService = new PaypalService();
 
-        ContractService contractService = new ContractService(paypalService);
-        contractService.processContract(contract, parcelas);
+            ContractService contractService = new ContractService(paypalService);
+            contractService.processContract(contract, parcelas);
 
-        for(Installment installment : contract.getInstallments()){
-            System.out.println(installment);
+            for(Installment installment : contract.getInstallments()){
+                System.out.println(installment);
+            }
+        }catch (InputMismatchException e){
+            System.out.println("Digite um valor valido!");
+        }catch (DateTimeParseException e){
+            System.out.println("Digite uma data valida! ");
         }
+
 
     }
 }
